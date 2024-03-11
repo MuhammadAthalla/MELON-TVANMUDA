@@ -18,10 +18,14 @@ class splashScreen extends StatelessWidget {
                 Navigator.pushNamed(context, LoginPage.routeName);
               },
               child: Text("login or register")),
-          ElevatedButton(onPressed: 
-          (){
-            Navigator.pushNamed(context, HomeScreen.routeName);
-          }, child: Text("home sam"))
+              const SizedBox(
+                height: 10,
+              ),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, HomeScreen.routeName);
+              },
+              child: Text("home sam"))
         ],
       ),
     );
