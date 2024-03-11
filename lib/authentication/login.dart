@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/authentication/register.dart';
-import 'package:ujikomtvanmuda/theme.dart';
 
 class LoginPage extends StatelessWidget {
   static String routeName = 'login_page';
