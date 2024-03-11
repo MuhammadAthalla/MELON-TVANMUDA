@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/authentication/register.dart';
+import 'package:ujikomtvanmuda/home/homeScreen.dart';
 import 'package:ujikomtvanmuda/splashScreen.dart';
 
 void main() {
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
       routes: {
         splashScreen.routeName: (context) => splashScreen(),
         LoginPage.routeName: (context) => LoginPage(),
-        RegisterPage.routeName:(context) => RegisterPage()
+        RegisterPage.routeName:(context) => RegisterPage(),
+        HomeScreen.routeName:(context) => const HomeScreen()
       },
     );
   }
