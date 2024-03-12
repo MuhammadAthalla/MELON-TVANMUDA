@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
-import 'package:ujikomtvanmuda/theme.dart';
 
 class RegisterPage extends StatelessWidget {
   static String routeName = 'register_page';
