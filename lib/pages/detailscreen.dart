@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/theme.dart';
 
+
 class DetailScreen extends StatelessWidget {
   static String routeName = 'detail_screen';
   const DetailScreen({super.key});

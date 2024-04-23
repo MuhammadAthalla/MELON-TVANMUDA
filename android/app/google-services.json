@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982254319426",
+    "project_id": "ujikom-58d00",
+    "storage_bucket": "ujikom-58d00.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982254319426:android:01ea1ae4d75917387cfadb",
+        "android_client_info": {
+          "package_name": "com.example.ujikomtvanmuda"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBppuJ0lTg5kEOosrlulYxKqSxm3DmyS08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
