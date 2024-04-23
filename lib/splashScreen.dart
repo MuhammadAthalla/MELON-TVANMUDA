@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ujikomtvanmuda/admin/homeadmin.dart';
+import 'package:ujikomtvanmuda/admin/tabcontroller.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/home/homeScreen.dart';
+import 'package:ujikomtvanmuda/pages/detailscreen.dart';
+import 'package:ujikomtvanmuda/pages/home.dart';
 
 class splashScreen extends StatelessWidget {
   static String routeName = 'splashScreen';
@@ -18,14 +22,24 @@ class splashScreen extends StatelessWidget {
                 Navigator.pushNamed(context, LoginPage.routeName);
               },
               child: Text("login or register")),
-              const SizedBox(
-                height: 10,
-              ),
+          const SizedBox(
+            height: 10,
+          ),
           ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, HomeScreen.routeName);
               },
-              child: Text("home sam"))
+              child: Text("home sam")),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, DetailScreen.routeName);
+              },
+              child: Text("detail screen")),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AdminPage.routeName);
+              },
+              child: Text("admin samm"))
         ],
       ),
     );
