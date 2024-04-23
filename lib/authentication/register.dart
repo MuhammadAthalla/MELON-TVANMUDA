@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isObscure = true;
   bool _isObscure2 = true;
 
-  //File? file;
+  File? file;
   var options = ['user', 'admin'];
 
   var _currentItemSelected = "user";

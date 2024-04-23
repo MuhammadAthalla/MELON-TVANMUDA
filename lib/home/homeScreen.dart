@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: const TabBarView(
           children: [
             Center(
-              child: home(),
+              child: Home(),
             ),
             Center(
               child: CartPage(),

@@ -14,15 +14,15 @@ List<Widget> screens = [DashBoardPage(), CartPage(), ProfilePage()];
 
 int selectedIndex = 0;
 
-class home extends StatefulWidget {
-  const home({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
   static const routeName = 'home';
 
   @override
-  State<home> createState() => _HomeScreenState();
+  State<Home> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<home> {
+class _HomeScreenState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final Shader linear = const LinearGradient(

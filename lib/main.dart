@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: home(),
+      home: Home(),
       theme: ThemeData(),
       initialRoute: splashScreen.routeName,
       routes: {
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         RegisterPage.routeName: (context) => RegisterPage(),
         HomeScreen.routeName: (context) => const HomeScreen(),
         DetailScreen.routeName: (context) => DetailScreen(),
-        home.routeName: (context) => home(),
+        Home.routeName: (context) => Home(),
         HomeAdmin.routeName: (context) => HomeAdmin(),
         AdminPage.routeName: (context) => AdminPage(),
         CreateArticle.routName: (context) => CreateArticle()
