@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +25,31 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   final _auth = FirebaseAuth.instance;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      await checkLoggedIn();
+    });
+  }
+
+  Future<void> checkLoggedIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      routeToHomeScreen();
+    }
+  }
+
+  void routeToHomeScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Shader linear = LinearGradient(
@@ -273,13 +299,12 @@ class _LoginPageState extends State<LoginPage> {
           email: email,
           password: password,
         );
-        route(context); // Menggunakan context yang valid
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(
+            'isLoggedIn', true); // Setelah berhasil login, simpan status login
+        routeToHomeScreen();
       } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          print('No user found for that email.');
-        } else if (e.code == 'wrong-password') {
-          print('Wrong password provided for that user.');
-        }
+        // Handle login error
       }
     }
   }

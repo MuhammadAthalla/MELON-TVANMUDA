@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       home: Home(),
       theme: ThemeData(),
-      initialRoute: splashScreen.routeName,
+      initialRoute: LoginPage.routeName,
       routes: {
         splashScreen.routeName: (context) => splashScreen(),
         LoginPage.routeName: (context) => LoginPage(),

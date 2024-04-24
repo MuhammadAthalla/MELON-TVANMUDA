@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/theme.dart';
 
@@ -485,8 +486,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> logout(BuildContext context) async {
-    CircularProgressIndicator();
     await FirebaseAuth.instance.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(
+        'isLoggedIn', false); // Setelah logout, hapus status login
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
