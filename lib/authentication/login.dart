@@ -109,7 +109,8 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius:
                             BorderRadius.all(const Radius.circular(44.0))),
                     hintText: "Password",
-                    hintStyle: GoogleFonts.poppins()),
+                    hintStyle: GoogleFonts.poppins(
+                        foreground: Paint()..shader = linear)),
                 validator: (value) {
                   RegExp regex = new RegExp(r'^.{6,}$');
                   if (value!.isEmpty) {
