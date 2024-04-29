@@ -29,6 +29,62 @@ class _HomeScreenState extends State<Home> {
 
   CollectionReference _articles =
       FirebaseFirestore.instance.collection("articles");
+
+  void _addArticle() {
+    _articles.add(
+        {'title': _titleController.text, 'detail': _detailController.text});
+  }
+
+  void _editArticle(DocumentSnapshot article) {
+    _titleController.text = article['title'];
+    _detailController.text = article['detail'];
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("edit user"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(labelText: "edit title"),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                TextFormField(
+                  controller: _detailController,
+                  decoration: InputDecoration(labelText: "edit detail"),
+                )
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("cencel")),
+              ElevatedButton(
+                  onPressed: () {
+                    _updateArticle(article.id);
+                    Navigator.pop(context);
+                  },
+                  child: Text("update"))
+            ],
+          );
+        });
+  }
+
+  void _updateArticle(String userId) {
+    _articles.doc(userId).update(
+        {'title': _titleController.text, 'detail': _detailController.text});
+
+    _titleController.clear();
+    _detailController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Shader linear = const LinearGradient(
@@ -228,7 +284,7 @@ class _HomeScreenState extends State<Home> {
                                                       children: [
                                                         ElevatedButton(
                                                           onPressed: () {
-                                                            // _addArticles()
+                                                            _addArticle();
                                                           },
                                                           child: Text(
                                                             'Tambah',
@@ -289,8 +345,8 @@ class _HomeScreenState extends State<Home> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     return ListView.builder(
-                        padding:
-                            const EdgeInsets.only(top: 370, right: 16, left: 16),
+                        padding: const EdgeInsets.only(
+                            top: 370, right: 16, left: 16),
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           var article = snapshot.data!.docs[index];
@@ -301,9 +357,10 @@ class _HomeScreenState extends State<Home> {
                               title: Text(
                                 article['title'],
                                 style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    foreground: Paint()..shader = linear),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  foreground: Paint()..shader = linear,
+                                ),
                               ),
                               subtitle: Text(
                                 article['detail'],
@@ -313,6 +370,24 @@ class _HomeScreenState extends State<Home> {
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14,
                                 ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      _editArticle(article);
+                                    },
+                                    icon: const Icon(Icons.edit),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    onPressed: () {
+                                      // _deleteArticle()
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                  ),
+                                ],
                               ),
                             ),
                           );
