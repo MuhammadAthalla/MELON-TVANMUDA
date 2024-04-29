@@ -95,6 +95,62 @@ class _HomeScreenState extends State<Home> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
+          Expanded(
+              child: StreamBuilder(
+                  stream: _articles.snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return ListView.builder(
+                        padding: const EdgeInsets.only(
+                            top: 370, right: 16, left: 16),
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          var article = snapshot.data!.docs[index];
+                          return Card(
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              title: Text(
+                                article['title'],
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  foreground: Paint()..shader = linear,
+                                ),
+                              ),
+                              subtitle: Text(
+                                article['detail'],
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      _editArticle(article);
+                                    },
+                                    icon: const Icon(Icons.edit),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    onPressed: () {
+                                      // _deleteArticle()
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        });
+                  })),
           Container(
             height: height / 2.5,
             decoration: const BoxDecoration(
@@ -337,62 +393,6 @@ class _HomeScreenState extends State<Home> {
               ],
             ),
           ),
-          Expanded(
-              child: StreamBuilder(
-                  stream: _articles.snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return ListView.builder(
-                        padding: const EdgeInsets.only(
-                            top: 370, right: 16, left: 16),
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          var article = snapshot.data!.docs[index];
-                          return Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              title: Text(
-                                article['title'],
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  foreground: Paint()..shader = linear,
-                                ),
-                              ),
-                              subtitle: Text(
-                                article['detail'],
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      _editArticle(article);
-                                    },
-                                    icon: const Icon(Icons.edit),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  IconButton(
-                                    onPressed: () {
-                                      // _deleteArticle()
-                                    },
-                                    icon: const Icon(Icons.delete),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-                  }))
         ],
       ),
     );
