@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ujikomtvanmuda/home/cart.dart';
@@ -23,6 +24,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _detailController = TextEditingController();
+
+  CollectionReference _articles =
+      FirebaseFirestore.instance.collection("articles");
   @override
   Widget build(BuildContext context) {
     final Shader linear = const LinearGradient(
@@ -133,7 +139,133 @@ class _HomeScreenState extends State<Home> {
                                               Color(0x0ff78CC5A)
                                             ]).createShader(bounds),
                                     child: IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Center(
+                                                    child: Text(
+                                                      'Tambah Data',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 24,
+                                                              foreground:
+                                                                  Paint()
+                                                                    ..shader =
+                                                                        linear),
+                                                    ),
+                                                  ),
+                                                  content:
+                                                      SingleChildScrollView(
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        const SizedBox(
+                                                            height: 20),
+                                                        TextFormField(
+                                                          maxLines: null,
+                                                          controller:
+                                                              _titleController,
+                                                          decoration: InputDecoration(
+                                                              enabledBorder: const UnderlineInputBorder(
+                                                                  borderSide: BorderSide(
+                                                                      color: Colors
+                                                                          .grey)),
+                                                              focusedBorder: const UnderlineInputBorder(
+                                                                  borderSide: BorderSide(
+                                                                      color: Color(
+                                                                          0x0ff20B263))),
+                                                              labelStyle: GoogleFonts.poppins(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  foreground: Paint()
+                                                                    ..shader =
+                                                                        linear),
+                                                              labelText:
+                                                                  'Masukkan Judul'),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 20),
+                                                        TextFormField(
+                                                          maxLines: null,
+                                                          controller:
+                                                              _detailController,
+                                                          decoration: InputDecoration(
+                                                              enabledBorder: const UnderlineInputBorder(
+                                                                  borderSide: BorderSide(
+                                                                      color: Colors
+                                                                          .grey)),
+                                                              focusedBorder: const UnderlineInputBorder(
+                                                                  borderSide: BorderSide(
+                                                                      color: Color(
+                                                                          0x0ff20B263))),
+                                                              labelStyle: GoogleFonts.poppins(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  foreground: Paint()
+                                                                    ..shader =
+                                                                        linear),
+                                                              labelText:
+                                                                  'Masukkan Artikel'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            // _addArticles()
+                                                          },
+                                                          child: Text(
+                                                            'Tambah',
+                                                            style: GoogleFonts.poppins(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                foreground:
+                                                                    Paint()
+                                                                      ..shader =
+                                                                          linear),
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Menutup dialog
+                                                          },
+                                                          child: Text(
+                                                            'Close',
+                                                            style: GoogleFonts.poppins(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                foreground:
+                                                                    Paint()
+                                                                      ..shader =
+                                                                          linear),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              });
+                                        },
                                         icon: const Icon(
                                           Icons.add,
                                           size: 35,
@@ -149,73 +281,43 @@ class _HomeScreenState extends State<Home> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 370, left: 44),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushNamed(context, DetailScreen.routeName);
-              },
-              child: Container(
-                height: 134,
-                width: 321,
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2.0,
-                          blurRadius: 32.0,
-                          offset: const Offset(4.0, 4.0))
-                    ],
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(Radius.circular(25))),
-                child: Row(
-                  children: [
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(17),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(25))),
-                            height: 100,
-                            width: 100,
-                          ),
-                        )
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 17, bottom: 17),
-                      child: Container(
-                        width: 150,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Melon G-2",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  foreground: Paint()..shader = linear),
+          Expanded(
+              child: StreamBuilder(
+                  stream: _articles.snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return ListView.builder(
+                        padding:
+                            const EdgeInsets.only(top: 370, right: 16, left: 16),
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          var article = snapshot.data!.docs[index];
+                          return Card(
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              title: Text(
+                                article['title'],
+                                style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    foreground: Paint()..shader = linear),
+                              ),
+                              subtitle: Text(
+                                article['detail'],
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
-                            Text(
-                              "Melon memiliki banyak khasiat untuk tubuh. Dilansir dari laman Kemenkes RI (TKPI) ada beberapa manfaat yang dimiliki melon, yaitu melancarkan sistem peredaran tubuh, membantu kinerja saraf dan otak, baik untuk sistem reproduksi, hingga sistem integumen.Di bawah ini terdapat 5 cara menanam melon yang bisa kamu terapkan.Menyiapkan Biji Melon Cara pertama yang dapat dilakukan adalah menyiapkan biji melon. Sisihkan biji melon dari buahnya dan rendam dengan air hangat selama ± 2 jam.Sebaiknya kamu ",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 12, fontWeight: FontWeight.w500),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
+                          );
+                        });
+                  }))
         ],
       ),
     );
