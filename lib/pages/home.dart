@@ -35,6 +35,10 @@ class _HomeScreenState extends State<Home> {
         {'title': _titleController.text, 'detail': _detailController.text});
   }
 
+  void _deleteArticle(String articleId) {
+    _articles.doc(articleId).delete();
+  }
+
   void _editArticle(DocumentSnapshot article) {
     _titleController.text = article['title'];
     _detailController.text = article['detail'];
@@ -65,13 +69,13 @@ class _HomeScreenState extends State<Home> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text("cencel")),
+                  child: Text("Batal")),
               ElevatedButton(
                   onPressed: () {
                     _updateArticle(article.id);
                     Navigator.pop(context);
                   },
-                  child: Text("update"))
+                  child: Text("Perbarui"))
             ],
           );
         });
@@ -141,7 +145,7 @@ class _HomeScreenState extends State<Home> {
                                   const SizedBox(width: 4),
                                   IconButton(
                                     onPressed: () {
-                                      // _deleteArticle()
+                                      _deleteArticle(article.id);
                                     },
                                     icon: const Icon(Icons.delete),
                                   ),
@@ -340,10 +344,12 @@ class _HomeScreenState extends State<Home> {
                                                       children: [
                                                         ElevatedButton(
                                                           onPressed: () {
-                                                            _addArticle();
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
                                                           },
                                                           child: Text(
-                                                            'Tambah',
+                                                            'Batal',
                                                             style: GoogleFonts.poppins(
                                                                 fontWeight:
                                                                     FontWeight
@@ -356,12 +362,13 @@ class _HomeScreenState extends State<Home> {
                                                         ),
                                                         ElevatedButton(
                                                           onPressed: () {
+                                                            _addArticle();
                                                             Navigator.of(
                                                                     context)
-                                                                .pop(); // Menutup dialog
+                                                                .pop();
                                                           },
                                                           child: Text(
-                                                            'Close',
+                                                            'Tambah',
                                                             style: GoogleFonts.poppins(
                                                                 fontWeight:
                                                                     FontWeight
