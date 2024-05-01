@@ -22,6 +22,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isObscure3 = true;
   bool visible = false;
+  bool _isLoggingIn =
+      false; // Variabel untuk menandai proses login sedang berlangsung
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -30,31 +32,6 @@ class _LoginPageState extends State<LoginPage> {
 
   // Variabel untuk menyimpan pesan kesalahan
   String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      await checkLoggedIn();
-    });
-  }
-
-  Future<void> checkLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    if (isLoggedIn) {
-      routeToHomeScreen();
-    }
-  }
-
-  void routeToHomeScreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomeScreen(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,14 +136,15 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   keyboardType: TextInputType.emailAddress,
                 ),
-
                 // Menampilkan pesan kesalahan
                 if (_errorMessage != null)
                   Text(
                     _errorMessage!,
                     style: TextStyle(color: Colors.red),
                   ),
-
+                // Tampilkan CircularProgressIndicator jika proses login sedang berlangsung
+                if (_isLoggingIn)
+                  CircularProgressIndicator(), // Tampilkan CircularProgressIndicator
                 SizedBox(
                   height: 20,
                 ),
@@ -201,13 +179,14 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       backgroundColor:
                           MaterialStateProperty.all(Colors.transparent),
-                      // elevation: MaterialStateProperty.all(3),
                       shadowColor:
                           MaterialStateProperty.all(Colors.transparent),
                     ),
                     onPressed: () {
                       setState(() {
                         visible = true;
+                        _isLoggingIn =
+                            true; // Setel variabel _isLoggingIn menjadi true saat proses login dimulai
                       });
                       signIn(emailController.text, passwordController.text);
                     },
@@ -220,7 +199,6 @@ class _LoginPageState extends State<LoginPage> {
                         'Login',
                         style: TextStyle(
                           fontSize: 18,
-                          // fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
@@ -275,37 +253,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void route(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      var kk = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get()
-          .then((DocumentSnapshot documentSnapshot) {
-        if (documentSnapshot.exists) {
-          if (documentSnapshot.get('role') == "admin") {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ),
-            );
-          }
-        } else {
-          print('Document does not exist on the database');
-        }
-      });
-    }
-  }
-
   void signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
@@ -321,8 +268,19 @@ class _LoginPageState extends State<LoginPage> {
         // Set pesan kesalahan
         setState(() {
           _errorMessage = e.message;
+          _isLoggingIn =
+              false; // Setel variabel _isLoggingIn menjadi false saat proses login selesai atau terjadi kesalahan
         });
       }
     }
+  }
+
+  void routeToHomeScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(),
+      ),
+    );
   }
 }
