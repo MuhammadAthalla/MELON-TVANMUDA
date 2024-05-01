@@ -136,6 +136,17 @@ class _HomeScreenState extends State<Home> {
     _detailController.clear();
   }
 
+  void navigateToDetailScreen(String title, String detail) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailScreen(title: title, detail: detail),
+      ),
+    );
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     final Shader linear = const LinearGradient(
@@ -154,12 +165,18 @@ class _HomeScreenState extends State<Home> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     return ListView.builder(
-                        padding: const EdgeInsets.only(
-                            top: 370, right: 16, left: 16),
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          var article = snapshot.data!.docs[index];
-                          return Card(
+                      padding:
+                          const EdgeInsets.only(top: 370, right: 16, left: 16),
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        var article = snapshot.data!.docs[index];
+                        return GestureDetector(
+                          // tambahkan GestureDetector
+                          onTap: () {
+                            navigateToDetailScreen(article['title'],
+                                article['detail']); // navigasi ke DetailScreen
+                          },
+                          child: Card(
                             elevation: 4,
                             margin: const EdgeInsets.symmetric(vertical: 8),
                             child: ListTile(
@@ -251,8 +268,10 @@ class _HomeScreenState extends State<Home> {
                                 ],
                               ),
                             ),
-                          );
-                        });
+                          ),
+                        );
+                      },
+                    );
                   })),
           Container(
             height: height / 2.5,
