@@ -24,6 +24,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home> {
+  final Shader linear = const LinearGradient(
+    colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
+  ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _detailController = TextEditingController();
 
@@ -46,37 +49,81 @@ class _HomeScreenState extends State<Home> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text("edit user"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
+          return SingleChildScrollView(
+            child: Column(
               children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: "edit title"),
+                AlertDialog(
+                  title: Text(
+                    "Edit Artikel",
+                    style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        foreground: Paint()..shader = linear),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        maxLines: null,
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                            enabledBorder: const UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey)),
+                            focusedBorder: const UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0x0ff20B263))),
+                            labelStyle: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                foreground: Paint()..shader = linear),
+                            labelText: 'Edit Judul'),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      TextFormField(
+                        maxLines: null,
+                        controller: _detailController,
+                        decoration: InputDecoration(
+                            enabledBorder: const UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey)),
+                            focusedBorder: const UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Color(0x0ff20B263))),
+                            labelStyle: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                foreground: Paint()..shader = linear),
+                            labelText: 'Edit Artikel'),
+                      )
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Batal",
+                          style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              foreground: Paint()..shader = linear),
+                        )),
+                    TextButton(
+                        onPressed: () {
+                          _updateArticle(article.id);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Perbarui",
+                          style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              foreground: Paint()..shader = linear),
+                        ))
+                  ],
                 ),
-                SizedBox(
-                  height: 8,
-                ),
-                TextFormField(
-                  controller: _detailController,
-                  decoration: InputDecoration(labelText: "edit detail"),
-                )
               ],
             ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text("Batal")),
-              ElevatedButton(
-                  onPressed: () {
-                    _updateArticle(article.id);
-                    Navigator.pop(context);
-                  },
-                  child: Text("Perbarui"))
-            ],
           );
         });
   }
@@ -145,7 +192,59 @@ class _HomeScreenState extends State<Home> {
                                   const SizedBox(width: 4),
                                   IconButton(
                                     onPressed: () {
-                                      _deleteArticle(article.id);
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                              "Konfirmasi",
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            content: Text(
+                                              "Apakah Anda yakin ingin menghapus artikel ini?",
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(
+                                                      context); // Tutup dialog
+                                                },
+                                                child: Text(
+                                                  "Batal",
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      foreground: Paint()
+                                                        ..shader = linear),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  _deleteArticle(article
+                                                      .id); // Tutup dialog // Panggil fungsi logout
+                                                },
+                                                child: Text(
+                                                  "Hapus",
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      foreground: Paint()
+                                                        ..shader = linear),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      //_deleteArticle(article.id);
                                     },
                                     icon: const Icon(Icons.delete),
                                   ),
@@ -342,7 +441,7 @@ class _HomeScreenState extends State<Home> {
                                                           MainAxisAlignment
                                                               .spaceBetween,
                                                       children: [
-                                                        ElevatedButton(
+                                                        TextButton(
                                                           onPressed: () {
                                                             Navigator.of(
                                                                     context)
@@ -360,7 +459,7 @@ class _HomeScreenState extends State<Home> {
                                                                           linear),
                                                           ),
                                                         ),
-                                                        ElevatedButton(
+                                                        TextButton(
                                                           onPressed: () {
                                                             _addArticle();
                                                             Navigator.of(

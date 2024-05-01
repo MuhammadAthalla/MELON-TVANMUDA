@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/authentication/register.dart';
 import 'package:ujikomtvanmuda/home/homeScreen.dart';
+import 'package:ujikomtvanmuda/home/profile.dart';
+import 'package:ujikomtvanmuda/pages/detailscreen.dart';
 import 'package:ujikomtvanmuda/pages/home.dart';
 
 class LoginPage extends StatefulWidget {
@@ -285,7 +287,6 @@ class _LoginPageState extends State<LoginPage> {
           }
         } else {
           print('Document does not exist on the database');
-          // Tangani kasus di mana dokumen tidak ditemukan di Firestore
         }
       });
     }
@@ -300,8 +301,7 @@ class _LoginPageState extends State<LoginPage> {
           password: password,
         );
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(
-            'isLoggedIn', true); // Setelah berhasil login, simpan status login
+        await prefs.setBool('isLoggedIn', true);
         routeToHomeScreen();
       } on FirebaseAuthException catch (e) {
         // Handle login error
