@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ujikomtvanmuda/home/cart.dart';
@@ -24,6 +25,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home> {
+  late User? _user;
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getUserRole();
+  }
+
+  Future<void> _getUserRole() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _user = user;
+          _isAdmin = userDoc.get('role') == 'admin';
+        });
+      }
+    }
+  }
+
   final Shader linear = const LinearGradient(
     colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
   ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
@@ -145,10 +175,10 @@ class _HomeScreenState extends State<Home> {
     );
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
+    String greetingText = _isAdmin ? 'Halo Admin 👋' : 'Halo User 👋';
+
     final Shader linear = const LinearGradient(
       colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
     ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
@@ -308,7 +338,7 @@ class _HomeScreenState extends State<Home> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Halo User 👋",
+                      greetingText,
                       style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
