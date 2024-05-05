@@ -21,17 +21,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isObscure3 = true;
-  bool visible = false;
-  bool _isLoggingIn =
-      false; // Variabel untuk menandai proses login sedang berlangsung
+  bool _isLoggingIn = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  final _auth = FirebaseAuth.instance;
-
-  // Variabel untuk menyimpan pesan kesalahan
-  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                       hintStyle: GoogleFonts.poppins(
                           foreground: Paint()..shader = linear)),
                   validator: (value) {
-                    if (value!.length == 0) {
+                    if (value!.isEmpty) {
                       return "Email cannot be empty";
                     }
                     if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
@@ -100,14 +93,15 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: _isObscure3,
                   decoration: InputDecoration(
                       suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _isObscure3 = !_isObscure3;
-                            });
-                          },
-                          icon: Icon(_isObscure3
-                              ? Icons.visibility
-                              : Icons.visibility_off)),
+                        onPressed: () {
+                          setState(() {
+                            _isObscure3 = !_isObscure3;
+                          });
+                        },
+                        icon: Icon(_isObscure3
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                      ),
                       filled: true,
                       fillColor: Colors.white,
                       enabled: true,
@@ -121,12 +115,8 @@ class _LoginPageState extends State<LoginPage> {
                       hintStyle: GoogleFonts.poppins(
                           foreground: Paint()..shader = linear)),
                   validator: (value) {
-                    RegExp regex = new RegExp(r'^.{6,}$');
                     if (value!.isEmpty) {
                       return "Password cannot be empty";
-                    }
-                    if (!regex.hasMatch(value)) {
-                      return ("please enter valid password min. 6 character");
                     } else {
                       return null;
                     }
@@ -136,15 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   keyboardType: TextInputType.emailAddress,
                 ),
-                // Menampilkan pesan kesalahan
-                if (_errorMessage != null)
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Colors.red),
-                  ),
-                // Tampilkan CircularProgressIndicator jika proses login sedang berlangsung
-                if (_isLoggingIn)
-                  CircularProgressIndicator(), // Tampilkan CircularProgressIndicator
                 SizedBox(
                   height: 20,
                 ),
@@ -183,25 +164,22 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialStateProperty.all(Colors.transparent),
                     ),
                     onPressed: () {
-                      setState(() {
-                        visible = true;
-                        _isLoggingIn =
-                            true; // Setel variabel _isLoggingIn menjadi true saat proses login dimulai
-                      });
-                      signIn(emailController.text, passwordController.text);
+                      _signIn(emailController.text, passwordController.text);
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(
                         top: 10,
                         bottom: 10,
                       ),
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isLoggingIn
+                          ? CircularProgressIndicator()
+                          : Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -253,9 +231,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void signIn(String email, String password) async {
+  void _signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
+        setState(() {
+          _isLoggingIn = true;
+        });
         UserCredential userCredential =
             await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -263,19 +244,59 @@ class _LoginPageState extends State<LoginPage> {
         );
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
-        routeToHomeScreen();
+        _routeToHomeScreen();
       } on FirebaseAuthException catch (e) {
-        // Set pesan kesalahan
+        // Panggil method untuk menampilkan modal error
+        _showErrorDialog(e.message!);
         setState(() {
-          _errorMessage = e.message;
-          _isLoggingIn =
-              false; // Setel variabel _isLoggingIn menjadi false saat proses login selesai atau terjadi kesalahan
+          _isLoggingIn = false;
         });
       }
     }
   }
 
-  void routeToHomeScreen() {
+  void _showErrorDialog(String errorMessage) {
+    final Shader linear = LinearGradient(
+      colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
+    ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Error",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              foreground: Paint()..shader = linear,
+            ),
+          ),
+          content: Text(
+            errorMessage,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "OK",
+                style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    foreground: Paint()..shader = linear),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _routeToHomeScreen() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
