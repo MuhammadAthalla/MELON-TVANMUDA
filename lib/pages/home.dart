@@ -201,10 +201,9 @@ class _HomeScreenState extends State<Home> {
                       itemBuilder: (context, index) {
                         var article = snapshot.data!.docs[index];
                         return GestureDetector(
-                          // tambahkan GestureDetector
                           onTap: () {
-                            navigateToDetailScreen(article['title'],
-                                article['detail']); // navigasi ke DetailScreen
+                            navigateToDetailScreen(
+                                article['title'], article['detail']);
                           },
                           child: Card(
                             elevation: 4,
@@ -227,76 +226,78 @@ class _HomeScreenState extends State<Home> {
                                   fontSize: 14,
                                 ),
                               ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      _editArticle(article);
-                                    },
-                                    icon: const Icon(Icons.edit),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  IconButton(
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text(
-                                              "Konfirmasi",
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            content: Text(
-                                              "Apakah Anda yakin ingin menghapus artikel ini?",
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(
-                                                      context); // Tutup dialog
-                                                },
-                                                child: Text(
-                                                  "Batal",
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      foreground: Paint()
-                                                        ..shader = linear),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                  _deleteArticle(article
-                                                      .id); // Tutup dialog // Panggil fungsi logout
-                                                },
-                                                child: Text(
-                                                  "Hapus",
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      foreground: Paint()
-                                                        ..shader = linear),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                      //_deleteArticle(article.id);
-                                    },
-                                    icon: const Icon(Icons.delete),
-                                  ),
-                                ],
-                              ),
+                              trailing: _isAdmin
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            _editArticle(article);
+                                          },
+                                          icon: const Icon(Icons.edit),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        IconButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text(
+                                                    "Konfirmasi",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 24,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  content: Text(
+                                                    "Apakah Anda yakin ingin menghapus artikel ini?",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "Batal",
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        _deleteArticle(
+                                                            article.id);
+                                                      },
+                                                      child: Text(
+                                                        "Hapus",
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                          icon: const Icon(Icons.delete),
+                                        ),
+                                      ],
+                                    )
+                                  : SizedBox(), // Jika bukan admin, tampilkan widget kosong
                             ),
                           ),
                         );
@@ -357,191 +358,194 @@ class _HomeScreenState extends State<Home> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            height: 60,
-                            width: 138,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
+                      if (_isAdmin)
+                        Row(
+                          children: [
+                            Container(
+                              height: 60,
+                              width: 138,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
                                     color: Colors.grey.withOpacity(0.5),
                                     spreadRadius: 2.0,
                                     blurRadius: 32.0,
-                                    offset: const Offset(4.0, 4.0))
-                              ],
-                              color: Colors.white,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(25)),
-                            ),
-                            child: Row(
-                              // Use a Row for horizontal layout
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween, // Align icons
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: Text(
-                                    "Tambah\nData",
-                                    style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        foreground: Paint()..shader = linear),
+                                    offset: const Offset(4.0, 4.0),
+                                  )
+                                ],
+                                color: Colors.white,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(25)),
+                              ),
+                              child: Row(
+                                // Use a Row for horizontal layout
+                                mainAxisAlignment: MainAxisAlignment
+                                    .spaceBetween, // Align icons
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      "Tambah\nData",
+                                      style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          foreground: Paint()..shader = linear),
+                                    ),
                                   ),
-                                ),
-                                ShaderMask(
-                                    blendMode: BlendMode.srcIn,
-                                    shaderCallback: (Rect bounds) =>
-                                        const RadialGradient(
-                                            center: Alignment.topCenter,
-                                            stops: [
-                                              .5,
-                                              1
-                                            ],
-                                            colors: [
-                                              Color(0xFF20B263),
-                                              Color(0x0ff78CC5A)
-                                            ]).createShader(bounds),
-                                    child: IconButton(
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: Center(
-                                                    child: Text(
-                                                      'Tambah Data',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 24,
-                                                              foreground:
-                                                                  Paint()
-                                                                    ..shader =
-                                                                        linear),
+                                  ShaderMask(
+                                      blendMode: BlendMode.srcIn,
+                                      shaderCallback: (Rect bounds) =>
+                                          const RadialGradient(
+                                              center: Alignment.topCenter,
+                                              stops: [
+                                                .5,
+                                                1
+                                              ],
+                                              colors: [
+                                                Color(0xFF20B263),
+                                                Color(0x0ff78CC5A)
+                                              ]).createShader(bounds),
+                                      child: IconButton(
+                                          onPressed: () {
+                                            showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: Center(
+                                                      child: Text(
+                                                        'Tambah Data',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 24,
+                                                                foreground:
+                                                                    Paint()
+                                                                      ..shader =
+                                                                          linear),
+                                                      ),
                                                     ),
-                                                  ),
-                                                  content:
-                                                      SingleChildScrollView(
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: <Widget>[
-                                                        const SizedBox(
-                                                            height: 20),
-                                                        TextFormField(
-                                                          maxLines: null,
-                                                          controller:
-                                                              _titleController,
-                                                          decoration: InputDecoration(
-                                                              enabledBorder: const UnderlineInputBorder(
-                                                                  borderSide: BorderSide(
-                                                                      color: Colors
-                                                                          .grey)),
-                                                              focusedBorder: const UnderlineInputBorder(
-                                                                  borderSide: BorderSide(
-                                                                      color: Color(
-                                                                          0x0ff20B263))),
-                                                              labelStyle: GoogleFonts.poppins(
-                                                                  fontSize: 14,
+                                                    content:
+                                                        SingleChildScrollView(
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: <Widget>[
+                                                          const SizedBox(
+                                                              height: 20),
+                                                          TextFormField(
+                                                            maxLines: null,
+                                                            controller:
+                                                                _titleController,
+                                                            decoration: InputDecoration(
+                                                                enabledBorder: const UnderlineInputBorder(
+                                                                    borderSide: BorderSide(
+                                                                        color: Colors
+                                                                            .grey)),
+                                                                focusedBorder: const UnderlineInputBorder(
+                                                                    borderSide: BorderSide(
+                                                                        color: Color(
+                                                                            0x0ff20B263))),
+                                                                labelStyle: GoogleFonts.poppins(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    foreground: Paint()
+                                                                      ..shader =
+                                                                          linear),
+                                                                labelText:
+                                                                    'Masukkan Judul'),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 20),
+                                                          TextFormField(
+                                                            maxLines: null,
+                                                            controller:
+                                                                _detailController,
+                                                            decoration: InputDecoration(
+                                                                enabledBorder: const UnderlineInputBorder(
+                                                                    borderSide: BorderSide(
+                                                                        color: Colors
+                                                                            .grey)),
+                                                                focusedBorder: const UnderlineInputBorder(
+                                                                    borderSide: BorderSide(
+                                                                        color: Color(
+                                                                            0x0ff20B263))),
+                                                                labelStyle: GoogleFonts.poppins(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    foreground: Paint()
+                                                                      ..shader =
+                                                                          linear),
+                                                                labelText:
+                                                                    'Masukkan Artikel'),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    actions: <Widget>[
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: Text(
+                                                              'Batal',
+                                                              style: GoogleFonts.poppins(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
                                                                   foreground: Paint()
                                                                     ..shader =
                                                                         linear),
-                                                              labelText:
-                                                                  'Masukkan Judul'),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 20),
-                                                        TextFormField(
-                                                          maxLines: null,
-                                                          controller:
-                                                              _detailController,
-                                                          decoration: InputDecoration(
-                                                              enabledBorder: const UnderlineInputBorder(
-                                                                  borderSide: BorderSide(
-                                                                      color: Colors
-                                                                          .grey)),
-                                                              focusedBorder: const UnderlineInputBorder(
-                                                                  borderSide: BorderSide(
-                                                                      color: Color(
-                                                                          0x0ff20B263))),
-                                                              labelStyle: GoogleFonts.poppins(
-                                                                  fontSize: 14,
+                                                            ),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              _addArticle();
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: Text(
+                                                              'Tambah',
+                                                              style: GoogleFonts.poppins(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
                                                                   foreground: Paint()
                                                                     ..shader =
                                                                         linear),
-                                                              labelText:
-                                                                  'Masukkan Artikel'),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Text(
-                                                            'Batal',
-                                                            style: GoogleFonts.poppins(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                foreground:
-                                                                    Paint()
-                                                                      ..shader =
-                                                                          linear),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            _addArticle();
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Text(
-                                                            'Tambah',
-                                                            style: GoogleFonts.poppins(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                foreground:
-                                                                    Paint()
-                                                                      ..shader =
-                                                                          linear),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              });
-                                        },
-                                        icon: const Icon(
-                                          Icons.add,
-                                          size: 35,
-                                        )))
-                              ],
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  );
+                                                });
+                                          },
+                                          icon: const Icon(
+                                            Icons.add,
+                                            size: 35,
+                                          )))
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
