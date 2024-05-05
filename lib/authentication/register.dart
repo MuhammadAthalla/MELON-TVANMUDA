@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
+import 'package:connectivity/connectivity.dart';
 
 class RegisterPage extends StatefulWidget {
   static String routeName = 'register_page';
@@ -15,26 +16,20 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  _RegisterPageState();
-
+  // State variables
   bool showProgress = false;
   bool visible = false;
-
+  bool _isObscure = true;
+  bool _isObscure2 = true;
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPassController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobile = TextEditingController();
-
-  bool _isObscure = true;
-  bool _isObscure2 = true;
-
   File? file;
   var options = ['user', 'admin'];
-
   var _currentItemSelected = "user";
   var role = "user";
 
@@ -257,11 +252,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           MaterialStateProperty.all(Colors.transparent),
                     ),
                     onPressed: () {
-                      setState(() {
-                        showProgress = true;
-                      });
-                      signUp(
-                          emailController.text, passwordController.text, role);
+                      _checkInternetConnection();
                     },
                     child: showProgress
                         ? const CircularProgressIndicator() // Menggunakan circular progress indicator default
@@ -350,7 +341,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  postDetailsToFirestore(String email, String role) async {
+  void postDetailsToFirestore(String email, String role) async {
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
@@ -403,5 +394,15 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       },
     );
+  }
+
+  void _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      showErrorDialog(
+          "No Internet Connection. Please check your internet connection and try again.");
+    } else {
+      signUp(emailController.text, passwordController.text, role);
+    }
   }
 }
