@@ -82,15 +82,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       hintStyle: GoogleFonts.poppins(
                           foreground: Paint()..shader = linear)),
                   validator: (value) {
-                    if (value!.length == 0) {
+                    if (value!.isEmpty) {
+                      showErrorDialog("Email cannot be empty");
                       return "Email cannot be empty";
                     }
                     if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
                         .hasMatch(value)) {
-                      return ("Please enter a valid email");
-                    } else {
-                      return null;
+                      showErrorDialog("Please enter a valid email");
+                      return "Please enter a valid email";
                     }
+                    return null;
                   },
                   onChanged: (value) {},
                   keyboardType: TextInputType.emailAddress,
@@ -127,13 +128,15 @@ class _RegisterPageState extends State<RegisterPage> {
                   validator: (value) {
                     RegExp regex = RegExp(r'^.{6,}$');
                     if (value!.isEmpty) {
+                      showErrorDialog("Password cannot be empty");
                       return "Password cannot be empty";
                     }
                     if (!regex.hasMatch(value)) {
-                      return ("please enter valid password min. 6 character");
-                    } else {
-                      return null;
+                      showErrorDialog(
+                          "Please enter a valid password min. 6 characters");
+                      return "Please enter a valid password min. 6 characters";
                     }
+                    return null;
                   },
                   onChanged: (value) {},
                 ),
@@ -167,10 +170,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           foreground: Paint()..shader = linear)),
                   validator: (value) {
                     if (confirmPassController.text != passwordController.text) {
-                      return "Password did not match";
-                    } else {
-                      return null;
+                      showErrorDialog("Passwords do not match");
+                      return "Passwords do not match";
                     }
+                    return null;
                   },
                   onChanged: (value) {},
                 ),
@@ -260,20 +263,22 @@ class _RegisterPageState extends State<RegisterPage> {
                       signUp(
                           emailController.text, passwordController.text, role);
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                      ),
-                      child: Text(
-                        'Register',
-                        style: TextStyle(
-                          fontSize: 18,
-                          // fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    child: showProgress
+                        ? const CircularProgressIndicator() // Menggunakan circular progress indicator default
+                        : const Padding(
+                            padding: EdgeInsets.only(
+                              top: 10,
+                              bottom: 10,
+                            ),
+                            child: Text(
+                              'Register',
+                              style: TextStyle(
+                                fontSize: 18,
+                                // fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
                 Stack(children: [
@@ -285,7 +290,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           TextButton(
                               onPressed: () {},
-                              child: const Text("you have an account?"))
+                              child: Text(
+                                "you have an account?",
+                                style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w500,
+                                    foreground: Paint()..shader = linear),
+                              ))
                         ],
                       )),
                       Positioned(
@@ -296,7 +306,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               },
                               child: Text(
                                 "Login",
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w500,
                                     foreground: Paint()..shader = linear),
                               )))
                     ],
@@ -346,5 +357,51 @@ class _RegisterPageState extends State<RegisterPage> {
     ref.doc(user!.uid).set({'email': emailController.text, 'role': role});
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => LoginPage()));
+  }
+
+  void showErrorDialog(String errorMessage) {
+    final Shader linear = const LinearGradient(
+      colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
+    ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    setState(() {
+      showProgress = false; // Mengatur showProgress kembali ke false
+    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Error',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              fontSize: 32,
+              foreground: Paint()..shader = linear,
+            ),
+          ),
+          content: Text(
+            errorMessage,
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.normal,
+              //color: const Color(0xFFED4337)
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'OK',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  foreground: Paint()..shader = linear,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
