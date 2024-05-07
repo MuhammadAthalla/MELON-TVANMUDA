@@ -27,6 +27,21 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      _routeToHomeScreen();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Shader linear = LinearGradient(
       colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
@@ -232,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signIn(String email, String password) async {
-    if (_formKey.currentState!.validate()) { 
+    if (_formKey.currentState!.validate()) {
       try {
         setState(() {
           _isLoggingIn = true;
@@ -246,7 +261,6 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setBool('isLoggedIn', true);
         _routeToHomeScreen();
       } on FirebaseAuthException catch (e) {
-        // Panggil method untuk menampilkan modal error
         _showErrorDialog(e.message!);
         setState(() {
           _isLoggingIn = false;
