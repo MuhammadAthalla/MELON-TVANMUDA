@@ -232,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signIn(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) { 
       try {
         setState(() {
           _isLoggingIn = true;
