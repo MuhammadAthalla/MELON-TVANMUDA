@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/theme.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -68,86 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 top: 30,
               ),
               child: InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Tutup",
-                                style: TextStyle(
-                                  color: primary,
-                                )))
-                      ],
-                      title: Text(
-                        "Flutter Map",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: Container(
-                        height: 250,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "username",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "M irfan",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "Email",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "irpanaja@gmail.com",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "phone",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "086666666",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "address",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "jalan jalan",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                onTap: () {},
                 child: Container(
                   height: 85,
                   width: 301,
@@ -206,110 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 top: 30,
               ),
               child: InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Tutup",
-                                style: TextStyle(
-                                  color: primary,
-                                )))
-                      ],
-                      title: Text(
-                        "Flutter Map",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: Container(
-                        height: 350,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "username",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "M irfan",
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.normal),
-                                ),
-                                IconButton(
-                                    onPressed: () {}, icon: Icon(Icons.edit))
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "Email",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "irpanaja@gmail.com",
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.normal),
-                                ),
-                                IconButton(
-                                    onPressed: () {}, icon: Icon(Icons.edit))
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "phone",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "086666666",
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.normal),
-                                ),
-                                IconButton(
-                                    onPressed: () {}, icon: Icon(Icons.edit))
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              "address",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "jalan ajalannxoanxsan",
-                                  style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.normal),
-                                ),
-                                IconButton(
-                                    onPressed: () {}, icon: Icon(Icons.edit))
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                onTap: () {},
                 child: Container(
                   height: 85,
                   width: 301,
@@ -367,8 +188,14 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.only(
                 top: 30,
               ),
-              child: InkWell(
-                onTap: () {},
+              child: ElevatedButton(
+                onPressed: () {
+                  _showLogoutDialog(context);
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    elevation: 0),
                 child: Container(
                   height: 85,
                   width: 301,
@@ -391,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Padding(
                             padding: EdgeInsets.only(left: 30, right: 20),
                             child: Container(
-                              child: Icon(Icons.history),
+                              child: Icon(Icons.logout),
                             ),
                           )
                         ],
@@ -405,7 +232,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Your History",
+                                "Log Out",
                                 style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -424,5 +251,66 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     ]));
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    final Shader linear = const LinearGradient(
+      colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
+    ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Konfirmasi",
+            style:
+                GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            "Apakah Anda yakin ingin keluar?",
+            style:
+                GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+              },
+              child: Text(
+                "Batal",
+                style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    foreground: Paint()..shader = linear),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+                logout(context); // Panggil fungsi logout
+              },
+              child: Text(
+                "Keluar",
+                style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    foreground: Paint()..shader = linear),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(
+        'isLoggedIn', false); // Setelah logout, hapus status login
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 }

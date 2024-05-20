@@ -16,6 +16,14 @@ dependencies:
   flutter_svg: ^2.0.10+1
   google_fonts: ^5.1.0
   gradient_borders: ^1.0.0
+  firebase_core: ^2.15.0
+  cloud_firestore: ^4.15.8
+  firebase_auth: ^4.17.8
+  shared_preferences: ^2.2.3
+  connectivity: ^3.0.6
+
+
+
 
 dev_dependencies:
   flutter_test:
