@@ -21,6 +21,9 @@ dependencies:
   firebase_auth: ^4.17.8
   shared_preferences: ^2.2.3
   connectivity: ^3.0.6
+  flutter_widget_from_html: ^0.15.0
+  html_editor_enhanced: ^2.5.1
+  url_launcher_windows: ^3.1.1
 
 
 

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:ujikomtvanmuda/theme.dart';
@@ -67,9 +68,8 @@ class DetailScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(
                             top: 200, left: 20, right: 20, bottom: 20),
-                        child: Text(
+                        child: HtmlWidget(
                           detail,
-                          textAlign: TextAlign.justify,
                         ),
                       ),
                     ),

@@ -1,20 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ujikomtvanmuda/home/cart.dart';
 import 'package:ujikomtvanmuda/home/dashboard.dart';
 import 'package:ujikomtvanmuda/home/profile.dart';
+import 'package:ujikomtvanmuda/pages/createPage.dart';
 import 'package:ujikomtvanmuda/pages/detailscreen.dart';
+import 'package:ujikomtvanmuda/pages/editPage.dart';
 import 'package:ujikomtvanmuda/theme.dart';
-
-List<IconData> navIcon = [Icons.home, Icons.carpenter, Icons.people];
-
-List<String> navTitle = ["Home", "Cart", "Profile"];
-
-List<Widget> screens = [DashBoardPage(), CartPage(), ProfilePage()];
-
-int selectedIndex = 0;
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -30,7 +26,6 @@ class _HomeScreenState extends State<Home> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getUserRole();
   }
@@ -59,111 +54,19 @@ class _HomeScreenState extends State<Home> {
   ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _detailController = TextEditingController();
-
+  TextEditingController _searchController = TextEditingController();
   CollectionReference _articles =
       FirebaseFirestore.instance.collection("articles");
-
-  void _addArticle() {
-    _articles.add(
-        {'title': _titleController.text, 'detail': _detailController.text});
-  }
 
   void _deleteArticle(String articleId) {
     _articles.doc(articleId).delete();
   }
 
-  void _editArticle(DocumentSnapshot article) {
-    _titleController.text = article['title'];
-    _detailController.text = article['detail'];
-
-    showDialog(
-        context: context,
-        builder: (context) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                AlertDialog(
-                  title: Text(
-                    "Edit Artikel",
-                    style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        foreground: Paint()..shader = linear),
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        maxLines: null,
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                            enabledBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey)),
-                            focusedBorder: const UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Color(0x0ff20B263))),
-                            labelStyle: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                foreground: Paint()..shader = linear),
-                            labelText: 'Edit Judul'),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      TextFormField(
-                        maxLines: null,
-                        controller: _detailController,
-                        decoration: InputDecoration(
-                            enabledBorder: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey)),
-                            focusedBorder: const UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Color(0x0ff20B263))),
-                            labelStyle: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                foreground: Paint()..shader = linear),
-                            labelText: 'Edit Artikel'),
-                      )
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Batal",
-                          style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              foreground: Paint()..shader = linear),
-                        )),
-                    TextButton(
-                        onPressed: () {
-                          _updateArticle(article.id);
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Perbarui",
-                          style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              foreground: Paint()..shader = linear),
-                        ))
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
-  }
-
-  void _updateArticle(String userId) {
-    _articles.doc(userId).update(
-        {'title': _titleController.text, 'detail': _detailController.text});
-
-    _titleController.clear();
-    _detailController.clear();
+  Stream<QuerySnapshot> _filteredNotesStream(String searchText) {
+    return _articles
+        .where('title', isGreaterThanOrEqualTo: searchText)
+        .where('title', isLessThanOrEqualTo: searchText + '\uf8ff')
+        .snapshots();
   }
 
   void navigateToDetailScreen(String title, String detail) {
@@ -185,11 +88,15 @@ class _HomeScreenState extends State<Home> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           Expanded(
               child: StreamBuilder(
-                  stream: _articles.snapshots(),
+                  stream: _searchController.text.isEmpty
+                      ? _articles.snapshots()
+                      : _filteredNotesStream(
+                          _searchController.text.toLowerCase()),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -218,7 +125,7 @@ class _HomeScreenState extends State<Home> {
                                 ),
                               ),
                               subtitle: Text(
-                                article['detail'],
+                                "Baca Article selengkapnya...",
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
@@ -232,10 +139,22 @@ class _HomeScreenState extends State<Home> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            _editArticle(article);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => EditPage(
+                                                  articleId: article.id,
+                                                  initialTitle:
+                                                      article['title'],
+                                                  initialDetail:
+                                                      article['detail'],
+                                                ),
+                                              ),
+                                            );
                                           },
                                           icon: const Icon(Icons.edit),
                                         ),
+
                                         const SizedBox(width: 4),
                                         IconButton(
                                           onPressed: () {
@@ -297,7 +216,7 @@ class _HomeScreenState extends State<Home> {
                                         ),
                                       ],
                                     )
-                                  : SizedBox(), // Jika bukan admin, tampilkan widget kosong
+                                  : const SizedBox(), // Jika bukan admin, tampilkan widget kosong
                             ),
                           ),
                         );
@@ -314,20 +233,15 @@ class _HomeScreenState extends State<Home> {
           ),
           Positioned(
             child: Padding(
-              padding: const EdgeInsets.only(top: 185, left: 66),
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(Radius.circular(25)),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2.0,
-                          blurRadius: 32.0,
-                          offset: const Offset(4.0, 4.0))
-                    ]),
-                width: width / 1.5,
-                height: height / 6,
+              padding: const EdgeInsets.only(top: 185, left: 40, right: 40),
+              child: CupertinoSearchTextField(
+                itemColor: Colors.black,
+                backgroundColor: Colors.white,
+                onChanged: (value) {
+                  setState(() {
+                    _searchController.text = value;
+                  });
+                },
               ),
             ),
           ),
@@ -407,145 +321,28 @@ class _HomeScreenState extends State<Home> {
                                               ]).createShader(bounds),
                                       child: IconButton(
                                           onPressed: () {
-                                            showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: Center(
-                                                      child: Text(
-                                                        'Tambah Data',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 24,
-                                                                foreground:
-                                                                    Paint()
-                                                                      ..shader =
-                                                                          linear),
-                                                      ),
-                                                    ),
-                                                    content:
-                                                        SingleChildScrollView(
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: <Widget>[
-                                                          const SizedBox(
-                                                              height: 20),
-                                                          TextFormField(
-                                                            maxLines: null,
-                                                            controller:
-                                                                _titleController,
-                                                            decoration: InputDecoration(
-                                                                enabledBorder: const UnderlineInputBorder(
-                                                                    borderSide: BorderSide(
-                                                                        color: Colors
-                                                                            .grey)),
-                                                                focusedBorder: const UnderlineInputBorder(
-                                                                    borderSide: BorderSide(
-                                                                        color: Color(
-                                                                            0x0ff20B263))),
-                                                                labelStyle: GoogleFonts.poppins(
-                                                                    fontSize:
-                                                                        14,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    foreground: Paint()
-                                                                      ..shader =
-                                                                          linear),
-                                                                labelText:
-                                                                    'Masukkan Judul'),
-                                                          ),
-                                                          const SizedBox(
-                                                              height: 20),
-                                                          TextFormField(
-                                                            maxLines: null,
-                                                            controller:
-                                                                _detailController,
-                                                            decoration: InputDecoration(
-                                                                enabledBorder: const UnderlineInputBorder(
-                                                                    borderSide: BorderSide(
-                                                                        color: Colors
-                                                                            .grey)),
-                                                                focusedBorder: const UnderlineInputBorder(
-                                                                    borderSide: BorderSide(
-                                                                        color: Color(
-                                                                            0x0ff20B263))),
-                                                                labelStyle: GoogleFonts.poppins(
-                                                                    fontSize:
-                                                                        14,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    foreground: Paint()
-                                                                      ..shader =
-                                                                          linear),
-                                                                labelText:
-                                                                    'Masukkan Artikel'),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: Text(
-                                                              'Batal',
-                                                              style: GoogleFonts.poppins(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  foreground: Paint()
-                                                                    ..shader =
-                                                                        linear),
-                                                            ),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              _addArticle();
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: Text(
-                                                              'Tambah',
-                                                              style: GoogleFonts.poppins(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  foreground: Paint()
-                                                                    ..shader =
-                                                                        linear),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  );
-                                                });
+                                            Navigator.pushNamed(
+                                                context, EditPage.routeName);
                                           },
                                           icon: const Icon(
                                             Icons.add,
                                             size: 35,
-                                          )))
+                                          ))),
                                 ],
                               ),
                             ),
                           ],
                         ),
+                      Positioned(
+                          child: Padding(
+                        padding: EdgeInsets.only(top: 520),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _launchURL();
+                          },
+                          child: Text("Order Here!!"),
+                        ),
+                      ))
                     ],
                   ),
                 ),
@@ -555,5 +352,15 @@ class _HomeScreenState extends State<Home> {
         ],
       ),
     );
+  }
+
+  _launchURL() async {
+    Uri _url = Uri.parse(
+        'https://api.whatsapp.com/send/?phone=%2B6282117229009&text&type=phone_number&app_absent=0');
+    if (await launchUrl(_url)) {
+      await launchUrl(_url);
+    } else {
+      throw 'Could not launch $_url';
+    }
   }
 }

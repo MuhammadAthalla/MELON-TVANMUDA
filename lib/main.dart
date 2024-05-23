@@ -5,7 +5,9 @@ import 'package:ujikomtvanmuda/admin/tabcontroller.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/authentication/register.dart';
 import 'package:ujikomtvanmuda/home/homeScreen.dart';
+import 'package:ujikomtvanmuda/pages/createPage.dart';
 import 'package:ujikomtvanmuda/pages/detailscreen.dart';
+import 'package:ujikomtvanmuda/pages/editPage.dart';
 import 'package:ujikomtvanmuda/pages/home.dart';
 import 'package:ujikomtvanmuda/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -42,7 +44,13 @@ class MyApp extends StatelessWidget {
         Home.routeName: (context) => Home(),
         HomeAdmin.routeName: (context) => HomeAdmin(),
         AdminPage.routeName: (context) => AdminPage(),
-        CreateArticle.routName: (context) => CreateArticle()
+        CreateArticle.routName: (context) => CreateArticle(),
+        CreatePage.routName: (context) => CreatePage(),
+        EditPage.routeName: (context) => EditPage(
+              articleId: '',
+              initialTitle: '',
+              initialDetail: '',
+            )
       },
     );
   }
