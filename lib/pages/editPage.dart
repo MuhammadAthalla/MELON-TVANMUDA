@@ -1,127 +1,153 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class EditPage extends StatefulWidget {
   final String articleId;
   final String initialTitle;
   final String initialDetail;
-
+  final String? imageUrl;
+  static String routeName = 'edit_page';
 
   const EditPage({
     Key? key,
     required this.articleId,
     required this.initialTitle,
     required this.initialDetail,
+    this.imageUrl,
   }) : super(key: key);
-
-  static const routeName = 'editPage';
 
   @override
   _EditPageState createState() => _EditPageState();
 }
 
 class _EditPageState extends State<EditPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final HtmlEditorController _htmlEditorController = HtmlEditorController();
-  final CollectionReference _articles =
-      FirebaseFirestore.instance.collection('articles');
+  late TextEditingController _titleController;
+  late TextEditingController _detailController;
+  HtmlEditorController _htmlEditorController = HtmlEditorController();
+  File? _imageFile;
 
   @override
   void initState() {
     super.initState();
-    _titleController.text = widget.initialTitle;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _htmlEditorController.setText(widget.initialDetail);
-    });
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _detailController = TextEditingController(text: widget.initialDetail);
   }
 
-  void _updateArticle() async {
-    String? updatedDetail = await _htmlEditorController.getText();
-    if (updatedDetail != null && updatedDetail.isNotEmpty) {
-      _articles.doc(widget.articleId).update({
-        'title': _titleController.text,
-        'detail': updatedDetail,
-      }).then((_) {
-        Navigator.pop(context);
-      }).catchError((error) {
-        // Handle error if update fails
-        print("Failed to update article: $error");
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
       });
-    } else {
-      print("Failed to get updated detail from HtmlEditor");
+    }
+  }
+
+  Future<String?> _uploadImage(File imageFile) async {
+    try {
+      final storageRef =
+          FirebaseStorage.instance.ref().child('articles/${widget.articleId}');
+      final uploadTask = storageRef.putFile(imageFile);
+      final snapshot = await uploadTask.whenComplete(() => null);
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Failed to upload image: $e');
+      return null;
+    }
+  }
+
+  Future<void> _updateArticle() async {
+    if (_titleController.text.isEmpty || _detailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Title and Detail cannot be empty')),
+      );
+      return;
+    }
+
+    String? imageUrl = widget.imageUrl;
+    if (_imageFile != null) {
+      imageUrl = await _uploadImage(_imageFile!);
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('articles')
+          .doc(widget.articleId)
+          .update({
+        'title': _titleController.text,
+        'detail': _detailController.text,
+        'image': imageUrl,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Article updated successfully')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update article: $e')),
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final Shader linear = const LinearGradient(
-      colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
-    ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+  void dispose() {
+    _titleController.dispose();
+    _detailController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Edit Artikel',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            foreground: Paint()..shader = linear,
-          ),
-        ),
-        backgroundColor: const Color(0xFF20B263),
+        title: Text('Edit Article', style: GoogleFonts.poppins()),
       ),
+      resizeToAvoidBottomInset: false,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
+          padding: const EdgeInsets.all(16.0),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             TextFormField(
-              maxLines: null,
               controller: _titleController,
               decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0x0ff20B263)),
-                ),
-                labelStyle: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  foreground: Paint()..shader = linear,
-                ),
-                labelText: 'Edit Judul',
+                labelText: 'Title',
+                border: OutlineInputBorder(),
+              ),
+              style: GoogleFonts.poppins(),
+            ),
+            SizedBox(height: 16),
+            HtmlEditor(
+              controller: _htmlEditorController,
+              htmlEditorOptions: HtmlEditorOptions(
+                hint: "Edit Artikel",
+                initialText: widget.initialDetail,
               ),
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: HtmlEditor(
-                controller: _htmlEditorController,
-                htmlEditorOptions: HtmlEditorOptions(
-                  hint: "Edit Artikel",
-                  initialText: widget.initialDetail,
-                ),
-              ),
+            SizedBox(height: 10),
+            Center(
+              child: _imageFile != null
+                  ? Image.file(_imageFile!, height: 80)
+                  : widget.imageUrl != null
+                      ? Image.network(widget.imageUrl!, height: 80)
+                      : Text('No image selected'),
             ),
-            const SizedBox(height: 16),
+            Spacer(),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text('Pick Image', style: GoogleFonts.poppins()),
+            ),
             ElevatedButton(
               onPressed: _updateArticle,
-              child: Text(
-                'Perbarui',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  foreground: Paint()..shader = linear,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF20B263),
-              ),
+              child: Text('Save Changes', style: GoogleFonts.poppins()),
             ),
-          ],
-        ),
-      ),
+          ])),
     );
   }
 }

@@ -45,8 +45,8 @@ class MyApp extends StatelessWidget {
         HomeAdmin.routeName: (context) => HomeAdmin(),
         AdminPage.routeName: (context) => AdminPage(),
         CreateArticle.routName: (context) => CreateArticle(),
-        CreatePage.routName: (context) => CreatePage(),
-        EditPage.routeName: (context) => EditPage(
+        CreatePage.routeName: (context) => CreatePage(),
+        EditPage.routeName: (context) => const EditPage(
               articleId: '',
               initialTitle: '',
               initialDetail: '',

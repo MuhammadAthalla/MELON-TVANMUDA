@@ -7,9 +7,6 @@ environment:
   sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
-  auto_size_text: ^3.0.0
-  auto_size_widget: ^0.0.4
-  awesome_dialog: ^3.2.0
   flutter:
     sdk: flutter
   flutter_icon_shadow: ^2.0.6
@@ -23,7 +20,15 @@ dependencies:
   connectivity: ^3.0.6
   flutter_widget_from_html: ^0.15.0
   html_editor_enhanced: ^2.5.1
-  url_launcher_windows: ^3.1.1
+  gallery_picker: ^0.5.1
+  image_picker: ^1.1.1
+  firebase_storage: ^11.7.6
+  auto_size_text: ^3.0.0
+  auto_size_widget: ^0.0.4
+  awesome_dialog: ^3.2.0
+  printing: ^5.12.0
+  pdf: ^3.8.0
+  flutter_native_splash: ^2.3.11
 
 
 
@@ -37,4 +42,4 @@ flutter:
   uses-material-design: true
   
   assets:
-    - assets/svg/
+    - assets/

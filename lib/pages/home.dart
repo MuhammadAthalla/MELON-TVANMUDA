@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ujikomtvanmuda/home/cart.dart';
-import 'package:ujikomtvanmuda/home/dashboard.dart';
-import 'package:ujikomtvanmuda/home/profile.dart';
 import 'package:ujikomtvanmuda/pages/createPage.dart';
 import 'package:ujikomtvanmuda/pages/detailscreen.dart';
 import 'package:ujikomtvanmuda/pages/editPage.dart';
-import 'package:ujikomtvanmuda/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
+
   static const routeName = 'home';
 
   @override
@@ -21,13 +18,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home> {
-  late User? _user;
+  User? _user;
   bool _isAdmin = false;
+  late Stream<QuerySnapshot> _stream;
+  late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
+    _stream = FirebaseFirestore.instance.collection("articles").snapshots();
     _getUserRole();
+    _searchController = TextEditingController();
   }
 
   Future<void> _getUserRole() async {
@@ -49,187 +50,246 @@ class _HomeScreenState extends State<Home> {
     }
   }
 
-  final Shader linear = const LinearGradient(
-    colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
-  ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _detailController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
-  CollectionReference _articles =
-      FirebaseFirestore.instance.collection("articles");
-
-  void _deleteArticle(String articleId) {
-    _articles.doc(articleId).delete();
+  Future<void> _deleteArticle(String articleId) async {
+    if (articleId.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("articles")
+            .doc(articleId)
+            .delete();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Artikel berhasil dihapus')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menghapus artikel: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus artikel: ID artikel kosong')),
+      );
+    }
   }
 
   Stream<QuerySnapshot> _filteredNotesStream(String searchText) {
-    return _articles
+    return FirebaseFirestore.instance
+        .collection("articles")
         .where('title', isGreaterThanOrEqualTo: searchText)
         .where('title', isLessThanOrEqualTo: searchText + '\uf8ff')
         .snapshots();
   }
 
-  void navigateToDetailScreen(String title, String detail) {
+  void navigateToDetailScreen(String title, String detail, String? imageUrl) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailScreen(title: title, detail: detail),
+        builder: (context) =>
+            DetailScreen(title: title, detail: detail, imageUrl: imageUrl),
       ),
+    );
+  }
+
+  Future<void> navigateToEditPage(
+    String articleId,
+    String initialTitle,
+    String initialDetail,
+    String? imageUrl,
+  ) async {
+    if (articleId.isNotEmpty &&
+        initialTitle.isNotEmpty &&
+        initialDetail.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditPage(
+            articleId: articleId,
+            initialTitle: initialTitle,
+            initialDetail: initialDetail,
+            imageUrl: imageUrl,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Gagal mengedit artikel: Data artikel tidak lengkap')),
+      );
+    }
+  }
+
+  void _confirmDeleteArticle(String articleId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Hapus Artikel",
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            "Apakah Anda yakin ingin menghapus artikel ini?",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                "Batal",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteArticle(articleId);
+              },
+              child: Text(
+                "Hapus",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     String greetingText = _isAdmin ? 'Halo Admin 👋' : 'Halo User 👋';
-
-    final Shader linear = const LinearGradient(
+    final Shader linear = LinearGradient(
       colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
-    ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
-          Expanded(
-              child: StreamBuilder(
-                  stream: _searchController.text.isEmpty
-                      ? _articles.snapshots()
-                      : _filteredNotesStream(
-                          _searchController.text.toLowerCase()),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return ListView.builder(
-                      padding:
-                          const EdgeInsets.only(top: 370, right: 16, left: 16),
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        var article = snapshot.data!.docs[index];
-                        return GestureDetector(
-                          onTap: () {
-                            navigateToDetailScreen(
-                                article['title'], article['detail']);
-                          },
-                          child: Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              title: Text(
-                                article['title'],
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  foreground: Paint()..shader = linear,
-                                ),
-                              ),
-                              subtitle: Text(
-                                "Baca Article selengkapnya...",
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              trailing: _isAdmin
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => EditPage(
-                                                  articleId: article.id,
-                                                  initialTitle:
-                                                      article['title'],
-                                                  initialDetail:
-                                                      article['detail'],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          icon: const Icon(Icons.edit),
-                                        ),
+          StreamBuilder<QuerySnapshot>(
+            stream: _searchController.text.isEmpty
+                ? _stream
+                : _filteredNotesStream(_searchController.text.toLowerCase()),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text("Error loading data"));
+              }
+              if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text("No data found"));
+              }
 
-                                        const SizedBox(width: 4),
-                                        IconButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: Text(
-                                                    "Konfirmasi",
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 24,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  content: Text(
-                                                    "Apakah Anda yakin ingin menghapus artikel ini?",
-                                                    style: GoogleFonts.poppins(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500),
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Text(
-                                                        "Batal",
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                      ),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                        _deleteArticle(
-                                                            article.id);
-                                                      },
-                                                      child: Text(
-                                                        "Hapus",
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          },
-                                          icon: const Icon(Icons.delete),
-                                        ),
-                                      ],
-                                    )
-                                  : const SizedBox(), // Jika bukan admin, tampilkan widget kosong
-                            ),
+              QuerySnapshot querySnapshot = snapshot.data!;
+              List<QueryDocumentSnapshot> documents = querySnapshot.docs;
+
+              List<Map<String, dynamic>> items = documents.map((e) {
+                var data = e.data() as Map<String, dynamic>;
+                data['id'] = e.id; // Tambahkan ID dokumen ke dalam data
+                return data;
+              }).toList();
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(top: 370, right: 16, left: 16),
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Map<String, dynamic> thisItem = items[index];
+                  String articleId = thisItem['id'] ?? '';
+                  String title = thisItem['title'] ?? '';
+                  String detail = thisItem['detail'] ?? '';
+                  String? imageUrl = thisItem['image'];
+
+                  if (articleId.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return GestureDetector(
+                    onTap: () {
+                      navigateToDetailScreen(title, detail, imageUrl);
+                    },
+                    child: Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        leading: Container(
+                          height: 80,
+                          width: 80,
+                          child: imageUrl != null
+                              ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(),
+                        ),
+                        title: Text(
+                          title,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            foreground: Paint()..shader = linear,
                           ),
-                        );
-                      },
-                    );
-                  })),
+                        ),
+                        subtitle: Text(
+                          "Baca Artikel selengkapnya...",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        trailing: _isAdmin
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      navigateToEditPage(
+                                          articleId, title, detail, imageUrl);
+                                    },
+                                    icon: const Icon(Icons.edit),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    onPressed: () {
+                                      _confirmDeleteArticle(articleId);
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
           Container(
-            height: height / 2.5,
-            decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.only(bottomLeft: Radius.circular(100)),
-                gradient: LinearGradient(
-                    colors: [Color(0xFF20B263), Color(0x0ff78CC5A)])),
+            height: MediaQuery.of(context).size.height / 2.5,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(100)),
+              gradient: LinearGradient(
+                colors: [Color(0xFF20B263), Color(0x0ff78CC5A)],
+              ),
+            ),
           ),
           Positioned(
             child: Padding(
@@ -255,94 +315,33 @@ class _HomeScreenState extends State<Home> {
                     Text(
                       greetingText,
                       style: GoogleFonts.poppins(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                     Text(
                       "Mau belajar apa hari ini",
                       style: GoogleFonts.poppins(
-                          fontSize: 14, color: Colors.white),
-                    )
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
-                const Spacer(),
+                Spacer(),
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       if (_isAdmin)
-                        Row(
-                          children: [
-                            Container(
-                              height: 60,
-                              width: 138,
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2.0,
-                                    blurRadius: 32.0,
-                                    offset: const Offset(4.0, 4.0),
-                                  )
-                                ],
-                                color: Colors.white,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(25)),
-                              ),
-                              child: Row(
-                                // Use a Row for horizontal layout
-                                mainAxisAlignment: MainAxisAlignment
-                                    .spaceBetween, // Align icons
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      "Tambah\nData",
-                                      style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                          foreground: Paint()..shader = linear),
-                                    ),
-                                  ),
-                                  ShaderMask(
-                                      blendMode: BlendMode.srcIn,
-                                      shaderCallback: (Rect bounds) =>
-                                          const RadialGradient(
-                                              center: Alignment.topCenter,
-                                              stops: [
-                                                .5,
-                                                1
-                                              ],
-                                              colors: [
-                                                Color(0xFF20B263),
-                                                Color(0x0ff78CC5A)
-                                              ]).createShader(bounds),
-                                      child: IconButton(
-                                          onPressed: () {
-                                            Navigator.pushNamed(
-                                                context, EditPage.routeName);
-                                          },
-                                          icon: const Icon(
-                                            Icons.add,
-                                            size: 35,
-                                          ))),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      Positioned(
-                          child: Padding(
-                        padding: EdgeInsets.only(top: 520),
-                        child: ElevatedButton(
+                        ElevatedButton(
                           onPressed: () {
-                            _launchURL();
+                            Navigator.pushNamed(context, CreatePage.routeName);
                           },
-                          child: Text("Order Here!!"),
+                          child: Text("+"),
                         ),
-                      ))
                     ],
                   ),
                 ),
@@ -352,15 +351,5 @@ class _HomeScreenState extends State<Home> {
         ],
       ),
     );
-  }
-
-  _launchURL() async {
-    Uri _url = Uri.parse(
-        'https://api.whatsapp.com/send/?phone=%2B6282117229009&text&type=phone_number&app_absent=0');
-    if (await launchUrl(_url)) {
-      await launchUrl(_url);
-    } else {
-      throw 'Could not launch $_url';
-    }
   }
 }
