@@ -16,6 +16,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String? _phoneNumber;
+  bool _isAdmin = false;
   final TextEditingController _phoneController = TextEditingController();
 
   @override
@@ -37,6 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (userDoc.exists) {
         setState(() {
           _phoneNumber = userDoc.data()?['phone'] ?? 'No phone number';
+          _isAdmin = userDoc.data()?['role'] == 'admin';
           _phoneController.text = _phoneNumber ?? '';
         });
       }
@@ -181,69 +183,74 @@ class _ProfilePageState extends State<ProfilePage> {
                         fontWeight: FontWeight.w500,
                         color: Colors.white),
                   ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 30,
-                      ),
-                      child: InkWell(
-                        onTap: _showEditPhoneDialog,
-                        child: Container(
-                          height: 85,
-                          width: 301,
-                          decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2.0,
-                                    blurRadius: 32.0,
-                                    offset: const Offset(4.0, 4.0))
-                              ],
-                              color: Colors.white,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(25))),
-                          child: Row(
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 30, right: 20),
-                                    child: Container(
-                                      child: Icon(Icons.add_ic_call_rounded),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 5, bottom: 5),
-                                child: Container(
-                                  width: 150,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Add Your Phone Number",
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            foreground: Paint()
-                                              ..shader = linear),
-                                      ),
+                  _isAdmin
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 30,
+                            ),
+                            child: InkWell(
+                              onTap: _showEditPhoneDialog,
+                              child: Container(
+                                height: 85,
+                                width: 301,
+                                decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2.0,
+                                          blurRadius: 32.0,
+                                          offset: const Offset(4.0, 4.0))
                                     ],
-                                  ),
+                                    color: Colors.white,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(25))),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 30, right: 20),
+                                          child: Container(
+                                            child:
+                                                Icon(Icons.add_ic_call_rounded),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 5, bottom: 5),
+                                      child: Container(
+                                        width: 150,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Add Your Phone Number",
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  foreground: Paint()
+                                                    ..shader = linear),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
+                        )
+                      : Container(),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(
