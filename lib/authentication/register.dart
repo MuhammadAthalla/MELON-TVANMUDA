@@ -175,44 +175,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(
                   height: 10,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Role : ",
-                      style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          foreground: Paint()..shader = linear),
-                    ),
-                    DropdownButton<String>(
-                      dropdownColor: Colors.white,
-                      isDense: true,
-                      isExpanded: false,
-                      iconEnabledColor: Colors.white,
-                      focusColor: Colors.white,
-                      items: options.map((String dropDownStringItem) {
-                        return DropdownMenuItem<String>(
-                          value: dropDownStringItem,
-                          child: Text(
-                            dropDownStringItem,
-                            style: GoogleFonts.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                foreground: Paint()..shader = linear),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (newValueSelected) {
-                        setState(() {
-                          _currentItemSelected = newValueSelected!;
-                          role = newValueSelected;
-                        });
-                      },
-                      value: _currentItemSelected,
-                    ),
-                  ],
-                ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -276,8 +238,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Positioned(
-                          child: Row(
+                      Row(
                         children: [
                           TextButton(
                               onPressed: () {},
@@ -288,19 +249,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                     foreground: Paint()..shader = linear),
                               ))
                         ],
-                      )),
-                      Positioned(
-                          child: TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                    context, LoginPage.routeName);
-                              },
-                              child: Text(
-                                "Login",
-                                style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w500,
-                                    foreground: Paint()..shader = linear),
-                              )))
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, LoginPage.routeName);
+                          },
+                          child: Text(
+                            "Login",
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                foreground: Paint()..shader = linear),
+                          ))
                     ],
                   ),
                 ])

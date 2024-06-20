@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
@@ -139,14 +140,24 @@ class _EditPageState extends State<EditPage> {
                       : Text('No image selected'),
             ),
             Spacer(),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Pick Image', style: GoogleFonts.poppins()),
-            ),
-            ElevatedButton(
-              onPressed: _updateArticle,
-              child: Text('Save Changes', style: GoogleFonts.poppins()),
-            ),
+            Center(
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _pickImage,
+                    child: Text('Pilih Gambar', style: GoogleFonts.poppins()),
+                  ),
+                  const SizedBox(
+                    height: 1,
+                  ),
+                  ElevatedButton(
+                    onPressed: _updateArticle,
+                    child:
+                        Text('Simpan Perubahan', style: GoogleFonts.poppins()),
+                  ),
+                ],
+              ),
+            )
           ])),
     );
   }

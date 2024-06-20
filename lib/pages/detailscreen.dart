@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:html/parser.dart' as html_parser;
 
 class DetailScreen extends StatelessWidget {
   static String routeName = 'detail_screen';
@@ -32,6 +33,14 @@ class DetailScreen extends StatelessWidget {
     return null;
   }
 
+  String _parseHtmlString(String htmlString) {
+    final document = html_parser.parse(htmlString);
+    final String parsedString =
+        html_parser.parse(document.body?.text ?? '').documentElement?.text ??
+            '';
+    return parsedString;
+  }
+
   Future<void> _exportToPDF(BuildContext context) async {
     final pdf = pw.Document();
     Uint8List? imageBytes;
@@ -40,10 +49,13 @@ class DetailScreen extends StatelessWidget {
       imageBytes = await _getImageData(imageUrl!);
     }
 
+    final String parsedDetail = _parseHtmlString(detail);
+
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
           return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
                 title,
@@ -56,7 +68,7 @@ class DetailScreen extends StatelessWidget {
                   padding: const pw.EdgeInsets.only(bottom: 20),
                   child: pw.Image(pw.MemoryImage(imageBytes)),
                 ),
-              pw.Text(HtmlWidget(detail).toString()),
+              pw.Text(parsedDetail),
             ],
           );
         },
@@ -88,7 +100,7 @@ class DetailScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.download),
             onPressed: () {
               _exportToPDF(context);
             },

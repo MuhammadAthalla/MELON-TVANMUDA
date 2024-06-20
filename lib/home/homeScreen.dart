@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
           tabs: [
             Tab(
               icon: Icon(Icons.home),
-              text: "Chats",
+              text: "Home",
             ),
             Tab(
               icon: Icon(Icons.trolley),

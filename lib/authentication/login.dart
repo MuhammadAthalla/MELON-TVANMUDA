@@ -230,14 +230,6 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text(
-                    "Or Login With",
-                    style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold, color: Colors.grey),
-                  ),
-                  SizedBox(
-                    height: 1,
-                  ),
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     IconButton(
                         onPressed: () {},

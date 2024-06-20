@@ -29,6 +29,16 @@ class _HomeScreenState extends State<Home> {
     _stream = FirebaseFirestore.instance.collection("articles").snapshots();
     _getUserRole();
     _searchController = TextEditingController();
+    _searchController.addListener(() {
+      setState(() {
+        if (_searchController.text.isEmpty) {
+          _stream =
+              FirebaseFirestore.instance.collection("articles").snapshots();
+        } else {
+          _stream = _filteredNotesStream(_searchController.text.toLowerCase());
+        }
+      });
+    });
   }
 
   Future<void> _getUserRole() async {
@@ -73,6 +83,7 @@ class _HomeScreenState extends State<Home> {
   }
 
   Stream<QuerySnapshot> _filteredNotesStream(String searchText) {
+    print("Filtering articles with search text: $searchText");
     return FirebaseFirestore.instance
         .collection("articles")
         .where('title', isGreaterThanOrEqualTo: searchText)
@@ -182,9 +193,7 @@ class _HomeScreenState extends State<Home> {
       body: Stack(
         children: <Widget>[
           StreamBuilder<QuerySnapshot>(
-            stream: _searchController.text.isEmpty
-                ? _stream
-                : _filteredNotesStream(_searchController.text.toLowerCase()),
+            stream: _stream,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -204,6 +213,8 @@ class _HomeScreenState extends State<Home> {
                 data['id'] = e.id; // Tambahkan ID dokumen ke dalam data
                 return data;
               }).toList();
+
+              print("Loaded ${items.length} articles");
 
               return ListView.builder(
                 padding: const EdgeInsets.only(top: 370, right: 16, left: 16),
@@ -234,6 +245,14 @@ class _HomeScreenState extends State<Home> {
                               ? Image.network(
                                   imageUrl,
                                   fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  },
                                 )
                               : Container(),
                         ),
@@ -297,9 +316,10 @@ class _HomeScreenState extends State<Home> {
               child: CupertinoSearchTextField(
                 itemColor: Colors.black,
                 backgroundColor: Colors.white,
+                controller: _searchController,
                 onChanged: (value) {
                   setState(() {
-                    _searchController.text = value;
+                    // Pencarian akan diperbarui otomatis oleh listener
                   });
                 },
               ),

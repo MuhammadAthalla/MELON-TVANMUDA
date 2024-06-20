@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,22 +25,30 @@ class _CartPageState extends State<CartPage> {
   late User? _user;
   bool _isAdmin = false;
   int _total = 0;
+  final TextEditingController _controller = TextEditingController();
 
-  void AddItem() {
+  void addItem() {
     setState(() {
       _total++;
+      _controller.text = _total.toString();
     });
   }
 
-  void Removeitem() {
+  void removeItem() {
     setState(() {
       _total--;
+      if (_total < 1) {
+        _total = 1;
+      }
+      _controller.text = _total.toString();
     });
   }
 
+  @override
   void initState() {
     super.initState();
     _getUserRole();
+    _controller.text = _total.toString();
   }
 
   Future<void> _getUserRole() async {
@@ -61,12 +70,17 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
+  void launchWhatsApp({required String number, required String message}) async {
+    String url = 'https://wa.me/$number?text=${Uri.encodeFull(message)}';
+    await canLaunch(url) ? launch(url) : print("Tidak Bisa Membuka WhatsApp");
+  }
+
   final Shader linear = const LinearGradient(
     colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
-  ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _detailController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   CollectionReference _articles =
       FirebaseFirestore.instance.collection("articles");
 
@@ -87,7 +101,7 @@ class _CartPageState extends State<CartPage> {
 
     final Shader linear = const LinearGradient(
       colors: <Color>[Color(0x0ff20B263), Color(0x0ff78CC5A)],
-    ).createShader(new Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -119,14 +133,80 @@ class _CartPageState extends State<CartPage> {
                         child: Card(
                           elevation: 4,
                           margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            title: Text(
-                              article['title'],
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                foreground: Paint()..shader = linear,
-                              ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 200,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(15)),
+                                  ),
+                                  child: article['image'] != null
+                                      ? Image.network(
+                                          article['image'],
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
+                                          },
+                                        )
+                                      : Container(),
+                                ),
+                                Text(
+                                  article['title'],
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    foreground: Paint()..shader = linear,
+                                  ),
+                                ),
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return HtmlWidget(
+                                      article['detail'],
+                                      customStylesBuilder: (element) {
+                                        if (element.localName == 'p') {
+                                          return {
+                                            'max-lines': '3',
+                                            'overflow': 'ellipsis',
+                                          };
+                                        }
+                                        return null;
+                                      },
+                                      textStyle: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                      renderMode: RenderMode.column,
+                                      customWidgetBuilder: (element) {
+                                        if (element.localName == 'p') {
+                                          return Text(
+                                            element.text ?? '',
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          );
+                                        }
+                                        return null;
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ));
@@ -184,66 +264,7 @@ class _CartPageState extends State<CartPage> {
                         children: [
                           if (_isAdmin)
                             Row(
-                              children: [
-                                Container(
-                                  height: 60,
-                                  width: 138,
-                                  decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2.0,
-                                        blurRadius: 32.0,
-                                        offset: const Offset(4.0, 4.0),
-                                      )
-                                    ],
-                                    color: Colors.white,
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(25)),
-                                  ),
-                                  child: Row(
-                                    // Use a Row for horizontal layout
-                                    mainAxisAlignment: MainAxisAlignment
-                                        .spaceBetween, // Align icons
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 10),
-                                        child: Text(
-                                          "Tambah\nData",
-                                          style: GoogleFonts.poppins(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                              foreground: Paint()
-                                                ..shader = linear),
-                                        ),
-                                      ),
-                                      ShaderMask(
-                                          blendMode: BlendMode.srcIn,
-                                          shaderCallback: (Rect bounds) =>
-                                              const RadialGradient(
-                                                  center: Alignment.topCenter,
-                                                  stops: [
-                                                    .5,
-                                                    1
-                                                  ],
-                                                  colors: [
-                                                    Color(0xFF20B263),
-                                                    Color(0x0ff78CC5A)
-                                                  ]).createShader(bounds),
-                                          child: IconButton(
-                                              onPressed: () {
-                                                Navigator.pushNamed(context,
-                                                    EditPage.routeName);
-                                              },
-                                              icon: const Icon(
-                                                Icons.add,
-                                                size: 35,
-                                              ))),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                              children: [],
                             ),
                         ]))
               ],
@@ -270,15 +291,15 @@ class CardDialog extends StatefulWidget {
 }
 
 class _CardDialogState extends State<CardDialog> {
-  late String _phoneNumber = ''; // Nomor telepon pengguna
+  late String _phoneNumber = '';
 
   @override
   void initState() {
     super.initState();
-    _getPhoneNumber(); // Panggil untuk mengambil nomor telepon saat widget diinisialisasi
+    _getPhoneNumber();
+    _controller.text = _total.toString();
   }
 
-  // Method untuk mengambil nomor telepon pengguna dari Firestore
   Future<void> _getPhoneNumber() async {
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -291,33 +312,35 @@ class _CardDialogState extends State<CardDialog> {
 
       if (userDoc.exists && userDoc.data()!.containsKey('phone')) {
         setState(() {
-          _phoneNumber =
-              userDoc.data()!['phone']; // Set nomor telepon yang diperoleh
+          _phoneNumber = userDoc.data()!['phone'];
         });
       }
     }
   }
 
-  // Method untuk membuka aplikasi WhatsApp dengan nomor telepon dan pesan tertentu
   void launchWhatsApp({required String number, required String message}) async {
-    String url = 'https://wa.me/$number?text=$message';
+    String url = 'https://wa.me/$number?text=${Uri.encodeFull(message)}';
     await canLaunch(url) ? launch(url) : print("Tidak Bisa Membuka WhatsApp");
   }
 
-  int _total = 0;
+  int _total = 1;
+  final TextEditingController _controller = TextEditingController();
 
-  void AddItem() {
+  @override
+  void addItem() {
     setState(() {
       _total++;
+      _controller.text = _total.toString();
     });
   }
 
-  void Removeitem() {
+  void removeItem() {
     setState(() {
       _total--;
       if (_total < 1) {
         _total = 1;
       }
+      _controller.text = _total.toString();
     });
   }
 
@@ -333,103 +356,122 @@ class _CardDialogState extends State<CardDialog> {
     );
   }
 
-  contentBox(context) {
+  Widget contentBox(BuildContext context) {
+    final Shader linear = const LinearGradient(
+      colors: <Color>[Color(0xFF20B263), Color(0xFF78CC5A)],
+    ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+
     return Stack(
       children: <Widget>[
         Container(
-          padding: EdgeInsets.only(left: 20, top: 20, right: 20, bottom: 20),
-          margin: EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(top: 20),
           decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black,
-                  offset: Offset(0, 10),
-                  blurRadius: 10,
-                ),
-              ]),
+            shape: BoxShape.rectangle,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                offset: const Offset(0, 5),
+                blurRadius: 5,
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
                 widget.initialTitle,
-                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  foreground: Paint()..shader = linear,
+                ),
               ),
-              SizedBox(
-                height: 10,
+              const SizedBox(height: 10),
+              Text(
+                "Jumlah yang ingin dibeli",
+                style: GoogleFonts.poppins(),
               ),
-              Text("jumlah yang ingin di beli"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                      onPressed: () {
-                        Removeitem();
+                    onPressed: removeItem,
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Container(
+                    width: 50,
+                    child: TextFormField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: '$_total',
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _total = int.tryParse(value) ?? 1;
+                        });
                       },
-                      icon: Icon(
-                        Icons.remove,
-                      )),
-                  Text('$_total'),
+                    ),
+                  ),
                   IconButton(
-                      onPressed: () {
-                        AddItem();
-                      },
-                      icon: Icon(Icons.add))
+                    onPressed: addItem,
+                    icon: const Icon(Icons.add),
+                  ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 20),
               Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const SizedBox(height: 10),
                   ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0x0ff78CC5A)),
-                      onPressed: () {},
-                      child: Text("Masukan Keranjang",
-                          style: GoogleFonts.poppins(color: Colors.white))),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0x0ff78CC5A)),
-                      onPressed: () {
-                        // Gunakan nomor telepon yang diperoleh untuk mengirim pesan WhatsApp
-                        launchWhatsApp(
-                            number:
-                                _phoneNumber, // Gunakan nomor telepon pengguna
-                            message:
-                                "Melon :  ${widget.initialTitle}\nJumlah Pesanan : $_total ");
-                      },
-                      child: Text(
-                        "Belanja Sekarang",
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      )),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF78CC5A),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      String message = "Halo, Sejahtera Seed,\n\n"
+                          "Saya ingin memesan produk ${widget.initialTitle} yang tersedia di toko Anda.\n"
+                          "Berikut adalah detail pesanan saya:\n"
+                          "Nama Barang: ${widget.initialTitle}\n"
+                          "Jumlah: $_total\n"
+                          "Catatan Tambahan: _catatan tambahan_\n"
+                          "Nama: _Nama Anda_\n"
+                          "Alamat Pengiriman: _Alamat Pengiriman_\n"
+                          "Nomor Telepon: _Nomor Telepon Penerima_\n\n"
+                          "Mohon konfirmasikan total biaya dan estimasi waktu pengiriman. Terima kasih!";
+                      launchWhatsApp(
+                        number: _phoneNumber,
+                        message: message,
+                      );
+                    },
+                    child: Text(
+                      "Belanja Sekarang",
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  ),
                 ],
-              )
-            ],
-          ),
-        ),
-        Positioned(
-          right: 0,
-          top: 0,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Align(
-              alignment: Alignment.topRight,
-              child: CircleAvatar(
-                backgroundColor: Colors.red,
-                radius: 14,
-                child: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 18,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Kembali",
+                  style: GoogleFonts.poppins(color: Colors.white),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ],
