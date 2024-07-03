@@ -111,7 +111,7 @@ class _CartPageState extends State<CartPage> {
           StreamBuilder(
               stream: _searchController.text.isEmpty
                   ? _articles.snapshots()
-                  : _filteredNotesStream(_searchController.text.toLowerCase()),
+                  : _filteredNotesStream(_searchController.text.toString()),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());

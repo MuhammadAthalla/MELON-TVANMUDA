@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ujikomtvanmuda/admin/createarticle.dart';
-import 'package:ujikomtvanmuda/admin/homeadmin.dart';
-import 'package:ujikomtvanmuda/admin/tabcontroller.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/authentication/register.dart';
 import 'package:ujikomtvanmuda/home/homeScreen.dart';
@@ -47,9 +44,6 @@ class MyApp extends StatelessWidget {
               detail: 'detail',
             ),
         Home.routeName: (context) => Home(),
-        HomeAdmin.routeName: (context) => HomeAdmin(),
-        AdminPage.routeName: (context) => AdminPage(),
-        CreateArticle.routName: (context) => CreateArticle(),
         CreatePage.routeName: (context) => CreatePage(),
         EditPage.routeName: (context) => const EditPage(
               articleId: '',

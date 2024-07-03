@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ujikomtvanmuda/admin/homeadmin.dart';
-import 'package:ujikomtvanmuda/admin/tabcontroller.dart';
 import 'package:ujikomtvanmuda/authentication/login.dart';
 import 'package:ujikomtvanmuda/home/homeScreen.dart';
 import 'package:ujikomtvanmuda/pages/detailscreen.dart';
@@ -35,11 +33,7 @@ class splashScreen extends StatelessWidget {
                 Navigator.pushNamed(context, DetailScreen.routeName);
               },
               child: Text("detail screen")),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, AdminPage.routeName);
-              },
-              child: Text("admin samm"))
+
         ],
       ),
     );

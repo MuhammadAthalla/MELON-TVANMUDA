@@ -35,7 +35,7 @@ class _HomeScreenState extends State<Home> {
           _stream =
               FirebaseFirestore.instance.collection("articles").snapshots();
         } else {
-          _stream = _filteredNotesStream(_searchController.text.toLowerCase());
+          _stream = _filteredNotesStream(_searchController.text.toString());
         }
       });
     });
